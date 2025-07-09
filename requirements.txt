@@ -1,0 +1,26 @@
+# 📊 BeeZero Dashboard - Requirements
+
+# Streamlit y componentes
+streamlit>=1.28.0
+
+# Manipulación de datos
+pandas>=2.0.0
+numpy>=1.24.0
+openpyxl>=3.1.0
+
+# AWS SDK para leer archivos desde S3
+boto3>=1.28.0
+botocore>=1.31.0
+
+# Visualización y gráficos
+plotly>=5.15.0
+
+# Variables de entorno
+python-dotenv>=1.0.0
+
+# Utilidades
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# Manejo de archivos temporales
+requests>=2.31.0 
