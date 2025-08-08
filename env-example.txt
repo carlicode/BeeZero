@@ -1,0 +1,54 @@
+# 🤖 BeeZero WhatsApp Bot - Configuración de Variables de Entorno
+# Copia este archivo como .env y completa los valores
+
+# ===== AWS CONFIGURATION =====
+AWS_ACCESS_KEY_ID=tu_access_key_aqui
+AWS_SECRET_ACCESS_KEY=tu_secret_key_aqui
+AWS_DEFAULT_REGION=us-east-1
+
+# ===== S3 CONFIGURATION =====
+S3_BUCKET_NAME=beezero-images-bucket
+S3_EXCEL_FOLDER=reportes/
+S3_EXCEL_FILENAME=analisis-imagenes.xlsx
+
+# ===== WHATSAPP CONFIGURATION =====
+WHATSAPP_GROUP_NAME=Reporte y Control Bee Zero
+WHATSAPP_GROUP_LINK=https://chat.whatsapp.com/JT0EExspp72ImTAnNXEKzg
+ALLOWED_GROUPS=Reporte y Control Bee Zero,BeeZero Production
+
+# ===== BOT CONFIGURATION =====
+DEBUG_MODE=false
+TIMEZONE=America/La_Paz
+BOT_NAME=BeeZero Bot
+BOT_VERSION=1.0.0
+
+# ===== PHONE CONFIGURATION =====
+COUNTRY_CODE=591
+VALID_PREFIXES=6,7
+PHONE_LENGTH=8
+
+# ===== SHEET NAMES =====
+TURNOS_SHEET=Turnos
+VEHICULOS_SHEET=Vehículos
+FACTURAS_SHEET=Facturas
+
+# ===== SECURITY =====
+# Opcional: Números de administrador (separados por coma)
+ADMIN_NUMBERS=59167123456,59177123456
+
+# ===== LOGGING =====
+LOG_LEVEL=INFO
+LOG_FILE=beezero-bot.log
+
+# ===== CACHE CONFIGURATION =====
+CACHE_TTL=300
+SYNC_INTERVAL=0
+MANUAL_UPDATE=true
+
+# ===== NOTIFICATIONS =====
+ENABLE_NOTIFICATIONS=true
+NOTIFICATION_WEBHOOK=https://your-webhook-url.com/notify
+
+# ===== BACKUP =====
+BACKUP_INTERVAL=3600
+BACKUP_RETENTION_DAYS=7 

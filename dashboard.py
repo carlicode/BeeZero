@@ -17,12 +17,12 @@ load_dotenv()
 
 # 🎨 CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(
-    page_title="🐝 BeeZero Dashboard",
+    page_title="BeeZero Dashboard",
     page_icon="🐝",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        'About': "Dashboard en tiempo real para análisis de imágenes de WhatsApp"
+        'About': "Dashboard en tiempo real para análisis de datos y gestión de turnos"
     }
 )
 
@@ -94,29 +94,60 @@ def download_excel_from_s3():
         # Leer Excel
         excel_data = response['Body'].read()
         
-        # Convertir a DataFrames
+        # Verificar qué hojas existen
         try:
-            facturas_df = pd.read_excel(
-                BytesIO(excel_data), 
-                sheet_name=AWS_CONFIG['FACTURAS_SHEET']
-            )
-        except:
+            excel_file = pd.ExcelFile(BytesIO(excel_data))
+            sheet_names = excel_file.sheet_names
+            print(f"📊 Hojas disponibles: {sheet_names}")
+        except Exception as e:
+            print(f"❌ Error leyendo Excel: {e}")
+            sheet_names = []
+        
+        # Función para encontrar hoja por nombre aproximado
+        def find_sheet(target_names):
+            for target in target_names:
+                if target in sheet_names:
+                    return target
+            return None
+        
+        # Convertir a DataFrames con búsqueda inteligente
+        # Facturas
+        facturas_sheet = find_sheet(['Facturas', 'facturas', 'FACTURAS'])
+        if facturas_sheet:
+        try:
+                facturas_df = pd.read_excel(BytesIO(excel_data), sheet_name=facturas_sheet)
+                print(f"✅ Facturas cargadas: {len(facturas_df)} registros")
+                print(f"📋 Columnas Facturas: {list(facturas_df.columns)}")
+            except Exception as e:
+                print(f"❌ Error cargando facturas: {e}")
+                facturas_df = pd.DataFrame()
+        else:
             facturas_df = pd.DataFrame()
             
+        # Vehículos
+        vehiculos_sheet = find_sheet(['Vehículos', 'Vehiculos', 'vehiculos', 'VEHICULOS'])
+        if vehiculos_sheet:
         try:
-            vehiculos_df = pd.read_excel(
-                BytesIO(excel_data), 
-                sheet_name=AWS_CONFIG['VEHICULOS_SHEET']
-            )
-        except:
+                vehiculos_df = pd.read_excel(BytesIO(excel_data), sheet_name=vehiculos_sheet)
+                print(f"✅ Vehículos cargados: {len(vehiculos_df)} registros")
+                print(f"📋 Columnas Vehículos: {list(vehiculos_df.columns)}")
+            except Exception as e:
+                print(f"❌ Error cargando vehículos: {e}")
+                vehiculos_df = pd.DataFrame()
+        else:
             vehiculos_df = pd.DataFrame()
             
+        # Turnos
+        turnos_sheet = find_sheet(['Turnos', 'turnos', 'TURNOS'])
+        if turnos_sheet:
         try:
-            turnos_df = pd.read_excel(
-                BytesIO(excel_data), 
-                sheet_name='Turnos'
-            )
-        except:
+                turnos_df = pd.read_excel(BytesIO(excel_data), sheet_name=turnos_sheet)
+                print(f"✅ Turnos cargados: {len(turnos_df)} registros")
+                print(f"📋 Columnas Turnos: {list(turnos_df.columns)}")
+            except Exception as e:
+                print(f"❌ Error cargando turnos: {e}")
+                turnos_df = pd.DataFrame()
+        else:
             turnos_df = pd.DataFrame()
         
         return {
@@ -142,7 +173,7 @@ def main():
     """Función principal del dashboard"""
     
     # Header
-    st.title("BeeZero Dashboard")
+    st.title("🐝 BeeZero Dashboard")
     st.markdown("### 📊 Análisis de Imágenes en Tiempo Real")
     
     # 🔄 SIDEBAR: Configuración de Actualización
@@ -178,20 +209,57 @@ def main():
         st.error(f"❌ Error conectando a S3: {data['error']}")
         st.stop()
     
-    # Métricas básicas con timestamps
+    # Métricas básicas con información adicional
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.metric("📸 Facturas", len(data['facturas']))
-        st.caption(f"📅 Actualizadas: {data['last_update'].strftime('%H:%M:%S')}")
+        facturas_count = len(data['facturas'])
+        st.metric("📸 Facturas", facturas_count)
+        
+        # Información adicional de facturas
+        if not data['facturas'].empty:
+            try:
+                if 'Estado' in data['facturas'].columns:
+                    pendientes = len(data['facturas'][data['facturas']['Estado'] == 'PENDIENTE'])
+                    pagadas = len(data['facturas'][data['facturas']['Estado'] == 'PAGADA'])
+                    st.caption(f"✅ Pagadas: {pagadas} | ⏳ Pendientes: {pendientes}")
+                else:
+                    st.caption(f"📅 Actualizadas: {data['last_update'].strftime('%H:%M:%S')}")
+            except:
+                st.caption(f"📅 Actualizadas: {data['last_update'].strftime('%H:%M:%S')}")
     
     with col2:
-        st.metric("🚗 Vehículos", len(data['vehiculos']))
-        st.caption(f"📅 Actualizadas: {data['last_update'].strftime('%H:%M:%S')}")
+        vehiculos_count = len(data['vehiculos'])
+        st.metric("🚗 Vehículos", vehiculos_count)
+    
+        # Información adicional de vehículos
+        if not data['vehiculos'].empty:
+            try:
+                if 'Estado' in data['vehiculos'].columns:
+                    activos = len(data['vehiculos'][data['vehiculos']['Estado'] == 'ACTIVO'])
+                    inactivos = len(data['vehiculos'][data['vehiculos']['Estado'] == 'INACTIVO'])
+                    st.caption(f"✅ Activos: {activos} | ❌ Inactivos: {inactivos}")
+                else:
+                    st.caption(f"📅 Actualizadas: {data['last_update'].strftime('%H:%M:%S')}")
+            except:
+                st.caption(f"📅 Actualizadas: {data['last_update'].strftime('%H:%M:%S')}")
     
     with col3:
-        st.metric("👷 Turnos", len(data['turnos']))
-        st.caption(f"📅 Actualizadas: {data['last_update'].strftime('%H:%M:%S')}")
+        turnos_count = len(data['turnos'])
+        st.metric("👷 Turnos", turnos_count)
+        
+        # Información adicional de turnos
+        if not data['turnos'].empty:
+            try:
+                if 'Estado' in data['turnos'].columns:
+                    activos = len(data['turnos'][data['turnos']['Estado'] == 'ACTIVO'])
+                    sin_inicio = len(data['turnos'][data['turnos']['Estado'] == 'SIN_INICIO'])
+                    cerrados = len(data['turnos'][data['turnos']['Estado'] == 'CERRADO'])
+                    st.caption(f"🟢 Activos: {activos} | 🔴 Sin inicio: {sin_inicio} | ⚫ Cerrados: {cerrados}")
+                else:
+                    st.caption(f"📅 Actualizadas: {data['last_update'].strftime('%H:%M:%S')}")
+            except:
+                st.caption(f"📅 Actualizadas: {data['last_update'].strftime('%H:%M:%S')}")
     
     # Tabs para las tablas
     tab1, tab2, tab3 = st.tabs(["🚗 Vehículos", "🧾 Facturas", "👷 Turnos"])
@@ -206,21 +274,50 @@ def main():
             with col2:
                 st.caption(f"🕐 {data['last_update'].strftime('%H:%M:%S')}")
             
-            # Filtrar solo columnas importantes para vehículos
+            # Filtrar solo columnas importantes para vehículos con más información
             columnas_importantes_vehiculos = [
-                'Placa', 'Marca', 'Modelo', 'Color', 'Año',
-                'Propietario', 'Telefono', 'Estado', 'Fecha_Registro'
+                'Placa', 'Marca', 'Modelo', 'Color', 'Año', 'Tipo_Vehiculo',
+                'Propietario', 'Telefono', 'CI_Propietario', 'Direccion',
+                'Estado', 'Fecha_Registro', 'Ultima_Inspeccion', 'Seguro',
+                'Licencia_Conducir', 'Vencimiento_Licencia', 'Observaciones'
             ]
             
             # Seleccionar solo las columnas que existen
             columnas_disponibles = [col for col in columnas_importantes_vehiculos if col in data['vehiculos'].columns]
             
             if columnas_disponibles:
-                vehiculos_filtrados = data['vehiculos'][columnas_disponibles]
+                vehiculos_filtrados = data['vehiculos'][columnas_disponibles].copy()
                 
                 # Formatear números de teléfono si existe la columna
                 if 'Telefono' in vehiculos_filtrados.columns:
                     vehiculos_filtrados['Telefono'] = vehiculos_filtrados['Telefono'].apply(format_phone_number)
+                
+                # Calcular antigüedad del vehículo
+                if 'Año' in vehiculos_filtrados.columns:
+                    def calcular_antiguedad(año):
+                        try:
+                            if pd.notna(año):
+                                año_actual = datetime.now().year
+                                antiguedad = año_actual - int(año)
+                                return f"{antiguedad} años"
+                            return "N/A"
+                        except:
+                            return "N/A"
+                    
+                    vehiculos_filtrados['Antigüedad'] = vehiculos_filtrados['Año'].apply(calcular_antiguedad)
+                
+                # Reordenar columnas para mejor visualización
+                columnas_orden = ['Placa', 'Estado', 'Marca', 'Modelo', 'Color', 'Año']
+                if 'Antigüedad' in vehiculos_filtrados.columns:
+                    columnas_orden.append('Antigüedad')
+                columnas_orden.extend(['Tipo_Vehiculo', 'Propietario', 'Telefono', 'CI_Propietario', 'Direccion', 
+                                     'Fecha_Registro', 'Ultima_Inspeccion', 'Seguro', 'Licencia_Conducir', 
+                                     'Vencimiento_Licencia', 'Observaciones'])
+                
+                # Filtrar solo las columnas que existen
+                columnas_orden_existentes = [col for col in columnas_orden if col in vehiculos_filtrados.columns]
+                if columnas_orden_existentes:
+                    vehiculos_filtrados = vehiculos_filtrados[columnas_orden_existentes]
                 
                 st.dataframe(vehiculos_filtrados, use_container_width=True)
             else:
@@ -239,21 +336,77 @@ def main():
             with col2:
                 st.caption(f"🕐 {data['last_update'].strftime('%H:%M:%S')}")
             
-            # Filtrar solo columnas importantes para facturas
+            # Filtrar solo columnas importantes para facturas con más información
             columnas_importantes_facturas = [
-                'Numero_Factura', 'Fecha', 'Cliente', 'Telefono', 
-                'Monto', 'Estado', 'Descripcion', 'Fecha_Registro'
+                'Numero_Factura', 'Fecha', 'Cliente', 'Telefono', 'CI_Cliente',
+                'Monto', 'Moneda', 'Metodo_Pago', 'Estado', 'Tipo_Servicio',
+                'Descripcion', 'Placa_Vehiculo', 'Conductor', 'Telefono_Conductor',
+                'Fecha_Registro', 'Fecha_Vencimiento', 'Descuento', 'Impuesto',
+                'Observaciones', 'Ubicacion_Servicio'
             ]
             
             # Seleccionar solo las columnas que existen
             columnas_disponibles = [col for col in columnas_importantes_facturas if col in data['facturas'].columns]
             
             if columnas_disponibles:
-                facturas_filtradas = data['facturas'][columnas_disponibles]
+                facturas_filtradas = data['facturas'][columnas_disponibles].copy()
                 
                 # Formatear números de teléfono si existe la columna
                 if 'Telefono' in facturas_filtradas.columns:
                     facturas_filtradas['Telefono'] = facturas_filtradas['Telefono'].apply(format_phone_number)
+                if 'Telefono_Conductor' in facturas_filtradas.columns:
+                    facturas_filtradas['Telefono_Conductor'] = facturas_filtradas['Telefono_Conductor'].apply(format_phone_number)
+                
+                # Formatear monto con símbolo de moneda
+                if 'Monto' in facturas_filtradas.columns and 'Moneda' in facturas_filtradas.columns:
+                    def formatear_monto(row):
+                        try:
+                            if pd.notna(row['Monto']):
+                                monto = float(row['Monto'])
+                                moneda = row['Moneda'] if pd.notna(row['Moneda']) else 'BOB'
+                                return f"{monto:.2f} {moneda}"
+                            return "N/A"
+                        except:
+                            return str(row['Monto']) if pd.notna(row['Monto']) else "N/A"
+                    
+                    facturas_filtradas['Monto_Formateado'] = facturas_filtradas.apply(formatear_monto, axis=1)
+                
+                # Calcular días hasta vencimiento
+                if 'Fecha_Vencimiento' in facturas_filtradas.columns:
+                    def calcular_dias_vencimiento(fecha_venc):
+                        try:
+                            if pd.notna(fecha_venc):
+                                fecha_venc = pd.to_datetime(fecha_venc)
+                                hoy = datetime.now()
+                                dias = (fecha_venc - hoy).days
+                                if dias > 0:
+                                    return f"{dias} días"
+                                elif dias == 0:
+                                    return "HOY"
+                                else:
+                                    return f"Vencida ({abs(dias)} días)"
+                            return "N/A"
+                        except:
+                            return "N/A"
+                    
+                    facturas_filtradas['Dias_Vencimiento'] = facturas_filtradas['Fecha_Vencimiento'].apply(calcular_dias_vencimiento)
+                
+                # Reordenar columnas para mejor visualización
+                columnas_orden = ['Numero_Factura', 'Estado', 'Fecha', 'Cliente', 'Telefono', 'CI_Cliente']
+                if 'Monto_Formateado' in facturas_filtradas.columns:
+                    columnas_orden.append('Monto_Formateado')
+                else:
+                    columnas_orden.extend(['Monto', 'Moneda'])
+                columnas_orden.extend(['Metodo_Pago', 'Tipo_Servicio', 'Descripcion', 'Placa_Vehiculo', 'Conductor', 
+                                     'Telefono_Conductor', 'Fecha_Registro', 'Fecha_Vencimiento'])
+                if 'Dias_Vencimiento' in facturas_filtradas.columns:
+                    columnas_orden.append('Dias_Vencimiento')
+                columnas_orden.extend(['Descuento', 'Impuesto', 'Observaciones', 'Ubicacion_Servicio'])
+                
+                # Filtrar solo las columnas que existen
+                columnas_orden_existentes = [col for col in columnas_orden if col in facturas_filtradas.columns]
+                if columnas_orden_existentes:
+                    facturas_filtradas = facturas_filtradas[columnas_orden_existentes]
                 
                 st.dataframe(facturas_filtradas, use_container_width=True)
             else:
@@ -272,21 +425,29 @@ def main():
             with col2:
                 st.caption(f"🕐 {data['last_update'].strftime('%H:%M:%S')}")
             
-            # Filtrar solo columnas importantes
+            # Filtrar solo columnas importantes con más información
             columnas_importantes = [
                 'ID_Turno', 
                 'Fecha_Inicio', 
+                'Timestamp_Inicio',
                 'Telefono_Inicio',
+                'Abejita',
+                'Auto',
+                'Apertura_Caja',
+                'Danos_Auto_Inicio',
                 'Estado',
                 'Fecha_Fin',
-                'Telefono_Fin'
+                'Timestamp_Fin',
+                'Telefono_Fin',
+                'Cierre_Caja',
+                'Danos_Auto_Fin'
             ]
             
             # Seleccionar solo las columnas que existen en el DataFrame
             columnas_disponibles = [col for col in columnas_importantes if col in data['turnos'].columns]
             
             if columnas_disponibles:
-                turnos_filtrados = data['turnos'][columnas_disponibles]
+                turnos_filtrados = data['turnos'][columnas_disponibles].copy()
                 
                 # Formatear números de teléfono
                 if 'Telefono_Inicio' in turnos_filtrados.columns:
@@ -294,12 +455,40 @@ def main():
                 if 'Telefono_Fin' in turnos_filtrados.columns:
                     turnos_filtrados['Telefono_Fin'] = turnos_filtrados['Telefono_Fin'].apply(format_phone_number)
                 
+                # Calcular duración del turno
+                if 'Timestamp_Inicio' in turnos_filtrados.columns and 'Timestamp_Fin' in turnos_filtrados.columns:
+                    def calcular_duracion(row):
+                        try:
+                            if pd.notna(row['Timestamp_Inicio']) and pd.notna(row['Timestamp_Fin']):
+                                inicio = pd.to_datetime(row['Timestamp_Inicio'], unit='s')
+                                fin = pd.to_datetime(row['Timestamp_Fin'], unit='s')
+                                duracion = fin - inicio
+                                horas = int(duracion.total_seconds() // 3600)
+                                minutos = int((duracion.total_seconds() % 3600) // 60)
+                                return f"{horas}h {minutos}m"
+                            return "N/A"
+                        except:
+                            return "N/A"
+                    
+                    turnos_filtrados['Duracion'] = turnos_filtrados.apply(calcular_duracion, axis=1)
+                
+                # Reordenar columnas para mejor visualización
+                columnas_orden = ['ID_Turno', 'Estado', 'Fecha_Inicio', 'Telefono_Inicio', 'Abejita', 'Auto']
+                if 'Duracion' in turnos_filtrados.columns:
+                    columnas_orden.append('Duracion')
+                columnas_orden.extend(['Apertura_Caja', 'Danos_Auto_Inicio', 'Fecha_Fin', 'Telefono_Fin', 'Cierre_Caja', 'Danos_Auto_Fin'])
+                
+                # Filtrar solo las columnas que existen
+                columnas_orden_existentes = [col for col in columnas_orden if col in turnos_filtrados.columns]
+                if columnas_orden_existentes:
+                    turnos_filtrados = turnos_filtrados[columnas_orden_existentes]
+                
                 st.dataframe(turnos_filtrados, use_container_width=True)
             else:
                 st.warning("⚠️ No se encontraron las columnas esperadas en los datos de turnos")
         else:
             st.warning("⚠️ No hay datos de turnos disponibles")
-
+    
 # 🚀 EJECUTAR APLICACIÓN
 if __name__ == "__main__":
     main() 

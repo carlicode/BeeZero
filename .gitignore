@@ -1,0 +1,68 @@
+# 🤖 BeeZero - WhatsApp Bot & Streamlit Dashboard
+
+# ===== WHATSAPP BOT =====
+# Sesión y caché de WhatsApp
+.wwebjs_cache/
+.wwebjs_auth/
+session/
+session-*/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== PYTHON & STREAMLIT =====
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Streamlit
+.streamlit/secrets.toml
+!.streamlit/secrets.toml.example
+
+# ===== ENVIRONMENT & SECRETS =====
+.env
+.env.*
+!env-example.txt
+*.key
+*.pem
+credentials.json
+
+# ===== SYSTEM FILES =====
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ===== LOGS & TEMP =====
+logs/
+*.log
+temp/
+tmp/
+*.tmp
+
+# ===== IDE & EDITORS =====
+.vscode/
+.idea/
+*.sublime-*
+
+# ===== TESTING & DEBUG =====
+.pytest_cache/
+.coverage
+htmlcov/
+test-*
+*.test.js
+
+# ===== KEEP THESE FILES =====
+# app.js ✅ (Bot principal)
+# config.js ✅ (Configuración del bot)
+# dashboard.py ✅ (Dashboard Streamlit)
+# requirements.txt ✅ (Dependencias Python)
+# package.json ✅ (Dependencias Node.js)
+# package-lock.json ✅ (Versiones exactas)
+# env-example.txt ✅ (Plantilla .env)
+# README.md ✅ (Documentación)
+# .streamlit/config.toml ✅ (Configuración Streamlit)

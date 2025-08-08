@@ -1,0 +1,52 @@
+{
+  "name": "beezero-whatsapp-bot",
+  "version": "1.0.0",
+  "description": "Bot de WhatsApp para BeeZero con sistema de turnos casado",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "init": "node initialize-excel.js",
+    "setup": "node initialize-excel.js",
+    "check": "node -e \"console.log('🔍 Verificando configuración...'); const {config} = require('./config'); console.log('✅ Configuración cargada:', JSON.stringify(config, null, 2));\"",
+    "debug": "node debug-bot.js",
+    "debug-all": "node debug-bot.js --allow-all",
+    "debug-restore": "node debug-bot.js --restore",
+    "fix": "node quick-fix.js",
+    "fix-restore": "node quick-fix.js --restore"
+  },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "beezero",
+    "turnos",
+    "nodejs",
+    "s3"
+  ],
+  "author": "BeeZero Team",
+  "license": "MIT",
+  "dependencies": {
+    "whatsapp-web.js": "^1.21.0",
+    "aws-sdk": "^2.1400.0",
+    "exceljs": "^4.3.0",
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
+    "qrcode-terminal": "^0.12.0",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tu-usuario/beezero-whatsapp-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tu-usuario/beezero-whatsapp-bot/issues"
+  },
+  "homepage": "https://github.com/tu-usuario/beezero-whatsapp-bot#readme"
+} 
