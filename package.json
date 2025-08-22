@@ -1,0 +1,26 @@
+{
+  "name": "pedidos",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:all": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "vite",
+    "clean:clientes": "node --loader node_modules/papaparse/node_modules/data-uri-to-buffer/loader.mjs scripts/clean-clientes.mjs || node scripts/clean-clientes.mjs",
+    "build": "vite build",
+    "preview": "vite preview --port 4173"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.24.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "papaparse": "^5.5.3",
+    "vite": "^5.3.4",
+    "xlsx": "^0.18.5"
+  }
+}

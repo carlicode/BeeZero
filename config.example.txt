@@ -1,0 +1,176 @@
+# 🚚 Sistema de Gestión de Pedidos BeeZero - Configuración de Ejemplo
+
+## 📋 PASOS PARA INSTALAR EN OTRA COMPUTADORA
+
+### 1️⃣ REQUISITOS PREVIOS
+- Node.js (versión 18 o superior): https://nodejs.org/
+- Git: https://git-scm.com/
+- Cuenta de Google con acceso a Google Sheets y Google Maps
+
+### 2️⃣ CLONAR E INSTALAR
+```bash
+# Clonar el repositorio
+git clone [URL_DEL_REPOSITORIO]
+cd Pedidos
+
+# Instalar dependencias del frontend
+npm install
+
+# Instalar dependencias del backend
+cd server && npm install && cd ..
+```
+
+### 3️⃣ CONFIGURAR GOOGLE CLOUD
+
+#### A. Crear proyecto en Google Cloud Console
+1. Ir a: https://console.cloud.google.com/
+2. Crear nuevo proyecto o seleccionar existente
+3. Habilitar APIs:
+   - Google Sheets API
+   - Google Maps Distance Matrix API
+
+#### B. Crear Service Account
+1. IAM & Admin > Service Accounts
+2. Crear nueva cuenta de servicio
+3. Descargar archivo JSON
+4. Copiar contenido al archivo .env del server
+
+#### C. Crear API Key para Google Maps
+1. APIs & Services > Credentials
+2. Crear nueva API Key
+3. Restringir a APIs necesarias
+
+### 4️⃣ CONFIGURAR GOOGLE SHEETS
+
+#### A. Crear Google Sheet con hojas:
+- Pedidos (principal)
+- Empresas (puntos de recojo/entrega)
+- Clientes (lista de clientes)
+- Bikers (lista de bikers)
+
+#### B. Compartir con Service Account
+1. Compartir > Agregar email del Service Account
+2. Dar permisos de Editor
+3. Copiar ID del sheet de la URL
+
+### 5️⃣ ARCHIVOS .ENV
+
+#### Archivo .env en la raíz:
+```env
+# Google Sheets Configuration
+VITE_SHEET_CSV_URL=https://docs.google.com/spreadsheets/d/TU_SHEET_ID/gviz/tq?tqx=out:csv&sheet=Pedidos
+VITE_EMPRESAS_CSV_URL=https://docs.google.com/spreadsheets/d/TU_SHEET_ID/gviz/tq?tqx=out:csv&sheet=Empresas
+VITE_CLIENTES_CSV_URL=https://docs.google.com/spreadsheets/d/TU_SHEET_ID/gviz/tq?tqx=out:csv&sheet=Clientes
+VITE_BIKERS_CSV_URL=https://docs.google.com/spreadsheets/d/TU_SHEET_ID/gviz/tq?tqx=out:csv&sheet=Bikers
+
+# Backend API URLs
+VITE_SHEET_WRITE_URL=http://localhost:5055/api/orders
+VITE_SHEET_API_KEY=tu_api_key_opcional
+
+# Google Maps API
+GOOGLE_MAPS_API_KEY=tu_google_maps_api_key
+```
+
+#### Archivo .env en server/:
+```env
+# Google Service Account
+GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"tu_proyecto","private_key_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","client_email":"tu-service@tu-proyecto.iam.gserviceaccount.com","client_id":"...","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"https://www.googleapis.com/robot/v1/metadata/x509/tu-service%40tu-proyecto.iam.gserviceaccount.com"}
+
+# Google Maps API
+GOOGLE_MAPS_API_KEY=tu_google_maps_api_key
+
+# Server Configuration
+PORT=5055
+NODE_ENV=development
+```
+
+### 6️⃣ EJECUTAR LA APLICACIÓN
+
+#### Opción A: Script automático
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+#### Opción B: Comando npm
+```bash
+npm run dev:all
+```
+
+#### Opción C: Por separado
+```bash
+# Terminal 1: Frontend
+npm run client
+
+# Terminal 2: Backend
+npm run server
+```
+
+### 7️⃣ ACCESO
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5055
+- Login: beezeroadmin / ThisPasswordIsBeeZero0000
+
+### 8️⃣ ESTRUCTURA DE GOOGLE SHEETS
+
+#### Hoja "Pedidos":
+```
+ID | Fecha Registro | Hora Registro | Fechas | Operador | Cliente | Recojo | Entrega | 
+Direccion Recojo | Direccion Entrega | Detalles de la Carrera | Dist. [Km] | 
+Medio Transporte | Precio [Bs] | Método pago pago | Biker | WhatsApp | 
+Hora Ini | Hora Fin | Duracion | Estado | Estado de pago | Observaciones | 
+Pago biker | Contacto biker | Link de contacto biker | Dia de la semana | 
+Cobro o pago | Monto cobro o pago
+```
+
+#### Hoja "Empresas":
+```
+Empresa | Mapa | Descripción
+```
+
+#### Hoja "Clientes":
+```
+Cliente | Teléfono | Dirección
+```
+
+#### Hoja "Bikers":
+```
+Biker | Whatsapp | Teléfono
+```
+
+### 9️⃣ VERIFICACIÓN
+- [ ] Node.js instalado (node --version)
+- [ ] Dependencias instaladas
+- [ ] Archivos .env creados
+- [ ] Google Sheets configurado
+- [ ] Google Cloud APIs habilitadas
+- [ ] Service Account configurado
+- [ ] API Key de Google Maps creada
+- [ ] Aplicación ejecutándose
+- [ ] Login funcionando
+
+### 🔧 SOLUCIÓN DE PROBLEMAS
+
+#### Puertos ocupados:
+```bash
+lsof -ti:5173 | xargs kill -9
+lsof -ti:5055 | xargs kill -9
+```
+
+#### Errores de Google Sheets:
+- Verificar permisos del Service Account
+- Confirmar SHEET_ID correcto
+- Revisar estructura de columnas
+
+#### Errores de Google Maps:
+- Verificar API key válida
+- Confirmar Distance Matrix API habilitada
+- Revisar límites de cuota
+
+### 📞 SOPORTE
+- Email: soporte@beezero.com
+- WhatsApp: +591 69499202
+- GitHub Issues: [Crear issue]
+
+---
+**Desarrollado con ❤️ por el equipo BeeZero**
