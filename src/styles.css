@@ -151,13 +151,6 @@ th { text-align:left; color: var(--muted); font-weight: 600; }
   border: 2px solid #bae6fd !important;
 }
 
-.precio-destacado.cuenta-mode {
-  background: #d4edda !important;
-  color: #155724 !important;
-  border-color: #c3e6cb !important;
-  font-style: italic !important;
-}
-
 /* Campo deshabilitado */
 .form-group input:disabled,
 .form-group select:disabled {
